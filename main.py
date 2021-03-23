@@ -22,9 +22,10 @@ MOVEMENT_SPEED = 5
 
 #levels setup
 current_level = 0
-LEVEL_COUNT = 3
-LEVELS_MAX_COINS = [4, 1, 2]
-LEVELS_MAX_SECONDS = [100, 100, 100]
+your_times = []
+LEVEL_COUNT = 4
+LEVELS_MAX_COINS = [4, 1, 2, 7]
+LEVELS_MAX_SECONDS = [15, 20, 30, 100]
 LEVELS = [
         [
             ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'],
@@ -60,6 +61,18 @@ LEVELS = [
             ['w', ' ', ' ', ' ', 'w', ' ', 'w', ' ', ' ', 'w'],
             ['w', 'w', 'w', 'w', ' ', 'w', ' ', 'w', ' ', 'w'],
             ['w', 'c', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'w'],
+            ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w']
+        ],
+        [
+            ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'],
+            ['w', 'c', ' ', ' ', 'w', 'c', ' ', ' ', 'c', 'w'],
+            ['w', ' ', ' ', ' ', ' ', 'w', ' ', ' ', 'w', 'w'],
+            ['w', ' ', ' ', 'w', ' ', 'w', 'w', ' ', 'w', 'w'],
+            ['w', ' ', 'c', 'w', ' ', 'w', ' ', ' ', 'c', 'w'],
+            ['w', ' ', ' ', ' ', 'p', ' ', ' ', 'w', 'w', 'w'],
+            ['w', ' ', ' ', 'w', ' ', 'w', ' ', ' ', ' ', 'w'],
+            ['w', 'w', 'w', 'w', ' ', ' ', ' ', ' ', ' ', 'w'],
+            ['w', 'c', ' ', ' ', ' ', ' ', 'w', 'c', 'w', 'w'],
             ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w']
         ]
 ]
@@ -200,6 +213,7 @@ class Level(arcade.View):
             self.score += 1
 
         if self.score == self.max_score:
+            your_times.append(self.total_time)
             if current_level < LEVEL_COUNT-1:
                 current_level += 1
                 view = Complete(self.total_time)
@@ -225,8 +239,10 @@ class Complete(arcade.View):
         arcade.start_render()
         status = self.message
         arcade.draw_text(status, 20, SCREEN_HEIGHT//2, arcade.color.WHITE, 40)
-        arcade.draw_text(f'Time : {self.time} seconds', 20, SCREEN_HEIGHT//2-45, arcade.color.WHITE, 15)
-        arcade.draw_text('Click anywhere to start next level.', 20, SCREEN_HEIGHT//2-90, arcade.color.WHITE, 15)
+        arcade.draw_text('Click anywhere to start next level.', 20, SCREEN_HEIGHT//2-45, arcade.color.WHITE, 15)
+        for x in range(len(your_times)):
+            arcade.draw_text(f'Level {x+1} : {your_times[x]} seconds', 20, SCREEN_HEIGHT//2-(x+2)*45, arcade.color.WHITE, 15)
+        
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, re-start the game. """
@@ -261,17 +277,21 @@ class Beat(arcade.View):
     def __init__(self):
         super().__init__()
         arcade.set_background_color(arcade.color.BLEU_DE_FRANCE)
-        self.message = 'You Beat the Game!!!!'
 
     def on_draw(self):
         """ Draw this view """
         arcade.start_render()
-        status = self.message
-        arcade.draw_text(status, 20, SCREEN_HEIGHT//2, arcade.color.WHITE, 40)
-        arcade.draw_text('Click anywhere to restart the game.', 20, SCREEN_HEIGHT//2-45, arcade.color.WHITE, 15)
+        y_pos = SCREEN_HEIGHT-100
+        arcade.draw_text('You Beat the Game!!!!', 20, y_pos, arcade.color.WHITE, 40)
+        arcade.draw_text('Click anywhere to restart the game.', 20, y_pos-45, arcade.color.WHITE, 15)
+        for x in range(len(your_times)):
+            arcade.draw_text(f'Level {x+1} : {your_times[x]} seconds', 20, y_pos-(x+2)*45, arcade.color.WHITE, 15)
+        arcade.draw_text(f'Total : {sum(your_times)} seconds', 20, y_pos-(len(your_times)+2)*45, arcade.color.WHITE, 15)
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, re-start the game. """
+        global your_times
+        your_times = []
         game_view = Level(LEVELS[current_level], LEVELS_MAX_COINS[current_level])
         game_view.setup()
         self.window.show_view(game_view)
