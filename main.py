@@ -1,4 +1,5 @@
 import arcade
+import random
 
 #game setup
 SCREEN_WIDTH = 750
@@ -25,7 +26,7 @@ current_level = 0
 your_times = []
 LEVEL_COUNT = 4
 LEVELS_MAX_COINS = [4, 1, 2, 7]
-LEVELS_MAX_SECONDS = [15, 20, 30, 100]
+LEVELS_MAX_SECONDS = [1000, 20, 30, 100]
 LEVELS = [
         [
             ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'],
@@ -85,7 +86,7 @@ class Level(arcade.View):
         super().__init__()
         self.levelMatrix = levelMatrix
         self.max_score = maxScore
-        arcade.set_background_color(arcade.color.AMAZON)
+        arcade.set_background_color((66, 66, 66))
 
     def setup(self):
         # Set up your game here
@@ -96,7 +97,8 @@ class Level(arcade.View):
         self.coin_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
         self.total_time = 0.0
-        
+        self.background = arcade.load_texture('./floor.png')
+
         self.score = 0
 
         #build wall
@@ -107,6 +109,7 @@ class Level(arcade.View):
         """ Render the screen. """
         arcade.start_render()
         # Your drawing code goes here
+        arcade.draw_lrwh_rectangle_textured(0,0,SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         self.player_list.draw()
         self.wall_list.draw()
         self.coin_list.draw()
@@ -122,7 +125,7 @@ class Level(arcade.View):
             arcade.draw_text(output, 10, 35, arcade.color.WHITE, 14)
 
     def add_wall(self, x, y, scale : float = 1):
-        wall = arcade.Sprite('./wallblock.png', 1 * scale)
+        wall = arcade.Sprite('./wallblock.png', 1 * scale, flipped_vertically=random.choice([True, False]))
         wall.center_x=x
         wall.center_y=y
         self.wall_list.append(wall)
@@ -133,7 +136,7 @@ class Level(arcade.View):
         self.playerSprite.center_y = y
         self.player_list.append(self.playerSprite)
 
-        self.player_sight = arcade.Sprite('./playerSight.png', 1 * scale)
+        self.player_sight = arcade.Sprite('./playerSight2.png', 1 * scale)
         self.player_sight.center_x = x
         self.player_sight.center_y = y
         self.player_sight_list.append(self.player_sight)
@@ -241,7 +244,7 @@ class Complete(arcade.View):
         arcade.draw_text(status, 20, SCREEN_HEIGHT//2, arcade.color.WHITE, 40)
         arcade.draw_text('Click anywhere to start next level.', 20, SCREEN_HEIGHT//2-45, arcade.color.WHITE, 15)
         for x in range(len(your_times)):
-            arcade.draw_text(f'Level {x+1} : {your_times[x]} seconds', 20, SCREEN_HEIGHT//2-(x+2)*45, arcade.color.WHITE, 15)
+            arcade.draw_text(f'Level {x+1} : {int(your_times[x])} seconds', 20, SCREEN_HEIGHT//2-(x+2)*45, arcade.color.WHITE, 15)
         
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
@@ -285,8 +288,8 @@ class Beat(arcade.View):
         arcade.draw_text('You Beat the Game!!!!', 20, y_pos, arcade.color.WHITE, 40)
         arcade.draw_text('Click anywhere to restart the game.', 20, y_pos-45, arcade.color.WHITE, 15)
         for x in range(len(your_times)):
-            arcade.draw_text(f'Level {x+1} : {your_times[x]} seconds', 20, y_pos-(x+2)*45, arcade.color.WHITE, 15)
-        arcade.draw_text(f'Total : {sum(your_times)} seconds', 20, y_pos-(len(your_times)+2)*45, arcade.color.WHITE, 15)
+            arcade.draw_text(f'Level {x+1} : {int(your_times[x])} seconds', 20, y_pos-(x+2)*20-30, arcade.color.WHITE, 15)
+        arcade.draw_text(f'Total : {int(sum(your_times))} seconds', 20, y_pos-(len(your_times)+2)*20-30, arcade.color.WHITE, 15)
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
         """ If the user presses the mouse button, re-start the game. """
